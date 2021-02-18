@@ -85,20 +85,20 @@ def parseJson(json_file):
         items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
         for item in items:
             #"required": ["ItemID", "Name", "Category", "Currently", "First_Bid", "Number_of_Bids", "Bids", "Location", "Country", "Started", "Ends", "Seller", "Description"]
-            # print(
-            #     item['ItemId']  + 
-            #     columnSeparator + item['UserId'] + 
-            #     columnSeparator + item['Country'] + 
-            #     columnSeparator + item['Location'] +
-            #     columnSeparator + item['Name'] + 
-            #     columnSeparator + transformDollar(item['Buy_Price']) +   #might not be in JSON
-            #     columnSeparator + transformDollar(item['First_Bid'] + 
-            #     columnSeparator + transformDollar(item['Currently']) + 
-            #     columnSeparator + items['Number_of_Bids']) +
-            #     columnSeparator + items['Description'] + 
-            #     columnSeparator + transformDttm(items['Started'] + 
-            #     columnSeparator + transformDttm(items['Ends']) + 
-            #     columnSeparator + CATEGORIES!!!!!)
+            print(
+                item['ItemID'] )# + 
+                # columnSeparator + item['UserID'] + 
+                # columnSeparator + item['Country'] + 
+                # columnSeparator + item['Location'] +
+                # columnSeparator + item['Name'] + 
+                # columnSeparator + transformDollar(item['Buy_Price']) +   #might not be in JSON
+                # columnSeparator + transformDollar(item['First_Bid'] + 
+                # columnSeparator + transformDollar(item['Currently']) + 
+                # columnSeparator + items['Number_of_Bids']) +
+                # columnSeparator + items['Description'] + 
+                # columnSeparator + transformDttm(items['Started'] + 
+                # columnSeparator + transformDttm(items['Ends']) + 
+                # columnSeparator + CATEGORIES!!!!!)
             
             parseBids(item['Bids'], item['ItemID'])
             parseSeller(item['Seller'], item['Country'], item['Location'])
@@ -117,7 +117,7 @@ Bidder dictionary containing all the content for each bidder
     this one is correct and done - think so
 """
 def parseSeller(seller, country, location):
-    sys.stdout = seller_file #redirects output stream to correct dat file
+    sys.stdout = sellers_file #redirects output stream to correct dat file
     print(
         seller['UserID'] +
         columnSeparator + seller['Rating'] + 
@@ -140,14 +140,14 @@ Bids{description:"Bids placed on the item", type:array, items}
             Time{description, type:string}
             Amount{description,type:string}
 """
-def parseBids(bids, itermID):
+def parseBids(bids, ItemID):
     sys.stdout = bids_file #redirects output stream to correct dat file
     if bids is None:
         placeNullNotNone()
         return
     for bid in bids:
-        print(ItemId + columnSeparator + bid['Bid']['Bidder']['UserID'] + columnSeparator + 
-            transformDollar(bid['Bid']['Amount']) + columnSeparator + transformDttm(bid['bid']['Time']))
+        print(ItemID + columnSeparator + bid['Bid']['Bidder']['UserID'] + columnSeparator + 
+            transformDollar(bid['Bid']['Amount']) + columnSeparator + transformDttm(bid['Bid']['Time']))
         parseBidder(bid['Bid']['Bidder'])
         # print(bids)
     return
@@ -156,12 +156,13 @@ def parseBids(bids, itermID):
 Bidder dictionary containing all the content for each bidder
 """
 def parseBidder(bidder):
-    sys.stdout = bidder_file #redirects output stream to correct dat file
-    if bidder['Location'] is None:
-        placeNullNotNone()
-    if bidder['Country'] is None:
-        placeNullNotNone() 
-    print(bidder['UserID'] + columnSeparator + bidder['Rating']) 
+    sys.stdout = bidders_file #redirects output stream to correct dat file
+    print(bidder)
+    # if bidder['Location'] is None:
+    #     placeNullNotNone()
+    # if bidder['Country'] is None:
+    #     placeNullNotNone() 
+    # print(bidder['UserID'] + columnSeparator + bidder['Rating']) 
     
     return
 
