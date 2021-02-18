@@ -85,8 +85,8 @@ def parseJson(json_file):
         items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
         for item in items:
             #"required": ["ItemID", "Name", "Category", "Currently", "First_Bid", "Number_of_Bids", "Bids", "Location", "Country", "Started", "Ends", "Seller", "Description"]
-            print(
-                item['ItemID'] )# + 
+            # print(item['ItemID'] )
+                # + 
                 # columnSeparator + item['UserID'] + 
                 # columnSeparator + item['Country'] + 
                 # columnSeparator + item['Location'] +
@@ -156,13 +156,12 @@ def parseBids(bids, ItemID):
 Bidder dictionary containing all the content for each bidder
 """
 def parseBidder(bidder):
-    sys.stdout = bidders_file #redirects output stream to correct dat file
-    print(bidder)
-    # if bidder['Location'] is None:
-    #     placeNullNotNone()
-    # if bidder['Country'] is None:
-    #     placeNullNotNone() 
-    # print(bidder['UserID'] + columnSeparator + bidder['Rating']) 
+    # sys.stdout = bidders_file #redirects output stream to correct dat file
+    if bidder['Location'] is None:
+        placeNullNotNone()
+    if bidder['Country'] is None:
+        placeNullNotNone() 
+    print(bidder['UserID'] + columnSeparator + bidder['Rating']) 
     
     return
 
@@ -171,8 +170,7 @@ replaces "none" item fields in the JSON file with the string "NULL"
 see Loading NULL Values in the bulk-loading.pdf
 """
 def placeNullNotNone():
-    print("NULL")
-    print(columnSeparator)
+    print("NULL" + columnSeparator)
     return
 
 """
