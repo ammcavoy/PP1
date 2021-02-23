@@ -100,7 +100,7 @@ def parseJson(json_file):
                 # columnSeparator + transformDttm(items['Ends']) + 
                 # columnSeparator + CATEGORIES!!!!!)
             
-            parseBids(item['Bids'], item['ItemID'])
+            # parseBids(item['Bids'], item['ItemID'])
             parseSeller(item['Seller'], item['Country'], item['Location'])
             """
             TODO: traverse the items dictionary to extract information from the
