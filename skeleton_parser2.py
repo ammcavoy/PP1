@@ -107,6 +107,9 @@ def parseJson(json_file):
                 print(columnSeparator + transformDollar(item['First_Bid']) ) #, end ='')
             else:
                 print(columnSeparator + "NULL" ) #, end ='')
+            # getting issues with the print statements after this line, and its about a none type
+            # but i checked the type of transformDollar(item['Currently'])  and colsep and neither were none
+            # it just needs to work for the 5 lines below these comments
             # print(
             #     columnSeparator + transformDollar(item['Currently']) + 
             #     columnSeparator + item['Number_of_Bids'] + 
