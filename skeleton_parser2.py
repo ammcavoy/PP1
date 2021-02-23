@@ -149,7 +149,6 @@ def parseBids(bids, ItemID):
         print(ItemID + columnSeparator + bid['Bid']['Bidder']['UserID'] + columnSeparator + 
             transformDollar(bid['Bid']['Amount']) + columnSeparator + transformDttm(bid['Bid']['Time']))
         parseBidder(bid['Bid']['Bidder'])
-        # print(bids)
     return
 
 """
