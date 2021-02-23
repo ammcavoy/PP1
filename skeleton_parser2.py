@@ -29,37 +29,44 @@ import sys
 from json import loads
 from re import sub
 
-#create .dat file object for each database
-sellers_file = open('sellers.dat', 'w') # called in parseSeller()
-bids_file    = open('bids.dat'   , 'w') # called in parseBids()
-bidders_file = open('bidders.dat', 'w') # called in parseBidders()
-items_file   = open('items.dat'  , 'w') # called in parseItems()
+# create .dat file object for each database
+sellers_file = open('sellers.dat', 'w')  # called in parseSeller()
+bids_file = open('bids.dat', 'w')  # called in parseBids()
+bidders_file = open('bidders.dat', 'w')  # called in parseBidders()
+items_file = open('items.dat', 'w')  # called in parseItems()
 
 columnSeparator = "|"
 
 # Dictionary of months used for date transformation
-MONTHS = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06',\
-        'Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
+MONTHS = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+        'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
 
 """
 Returns true if a file ends in .json
 """
+
+
 def isJson(f):
     return len(f) > 5 and f[-5:] == '.json'
+
 
 """
 Converts month to a number, e.g. 'Dec' to '12'
 """
+
+
 def transformMonth(mon):
     if mon in MONTHS:
         return MONTHS[mon]
     else:
         return mon
 
+
 """
 Transforms a timestamp from Mon-DD-YY HH:MM:SS to YYYY-MM-DD HH:MM:SS
 """
-#hello, where be the changes?
+
+
 def transformDttm(dttm):
     dttm = dttm.strip().split(' ')
     dt = dttm[0].split('-')
@@ -67,58 +74,89 @@ def transformDttm(dttm):
     date += transformMonth(dt[0]) + '-' + dt[1]
     return date + ' ' + dttm[1]
 
+
 """
 Transform a dollar value amount from a string like $3,453.23 to XXXXX.xx
 """
+
 
 def transformDollar(money):
     if money == None or len(money) == 0:
         return money
     return sub(r'[^\d.]', '', money)
 
+
 """
 Parses a single json file. Currently, there's a loop that iterates over each
 item in the data set. Your job is to extend this functionality to create all
 of the necessary SQL tables for your database.
 """
+
+
 def parseJson(json_file):
     with open(json_file, 'r') as f:
-        items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
+        # creates a Python dictionary of Items for the supplied json file
+        items = loads(f.read())['Items']
         count = 0
         for item in items:
-            #"required": ["ItemID", "Name", "Category", "Currently", "First_Bid", "Number_of_Bids", "Bids", "Location", "Country", "Started", "Ends", "Seller", "Description"]
-            sys.stdout = items_file #redirects output stream to correct dat file
+            # "required": ["ItemID", "Name", "Category", "Currently", "First_Bid", "Number_of_Bids", "Bids", "Location", "Country", "Started", "Ends", "Seller", "Description"]
+            sys.stdout = items_file  # redirects output stream to correct dat file
             # sys.stdout = sys.__stdout__ #redirects output stream to correct dat file
             # print(count)
             # for key, value in item.items() :
             #     print (key, value)
             count += 1
             print(
-                item['ItemID']  + 
-                columnSeparator + item['Seller']['UserID'] + 
-                columnSeparator + item['Country'] + 
-                columnSeparator + item['Location'] +
-                columnSeparator + item['Name'], end ='')
+                item['ItemID'] +
+                columnSeparator + sqlString(item['Seller']['UserID']) +
+                columnSeparator + sqlString(item['Country']) +
+                columnSeparator + sqlString(item['Location']) +
+                columnSeparator + sqlString(item['Name']), end='')
                 # columnSeparator + transformDollar(item['Buy_Price']) +   #might not be in JSON
             if 'Buy_Price' in item.keys():
-                print(columnSeparator + transformDollar(item['Buy_Price']), end ='')
+                print(columnSeparator +
+                      transformDollar(item['Buy_Price']), end='')
             else:
-                print(columnSeparator + "NULL", end ='')
-            if 'First_Bid' in item.keys():
-                print(columnSeparator + transformDollar(item['First_Bid']) ) #, end ='')
+                print(columnSeparator + "\"NULL\"", end='')
+            
+            print(
+                columnSeparator + transformDollar(item['First_Bid']) +
+                columnSeparator + transformDollar(item['Currently']) +
+                columnSeparator + item['Number_of_Bids'] +
+                columnSeparator + transformDollar(item['Started']) + 
+                columnSeparator + transformDttm(item['Ends']), end = '')
+            # if item['Currently'] == None or len(item['Currently']) == 0:
+            #     print(columnSeparator + "NULL", end='')
+            # else:
+            #    print(columnSeparator + transformDollar(item['Currently']), end='')
+
+            # if item['Number_of_Bids'] == None or len(item['Number_of_Bids']) == 0:
+            #     print(columnSeparator + "\"NULL\"", end='')
+            # else:
+            #    print(columnSeparator + item['Number_of_Bids'], end='')
+
+            # if item['Started'] == None or len(item['Started']) == 0:
+            #     print(columnSeparator + "\"NULL\"", end='')
+            # else:
+            #    print(columnSeparator + transformDollar(item['Started']), end='')
+
+            # if item['Ends'] == None or len(item['Ends']) == 0:
+            #     print(columnSeparator + "\"NULL\"", end='')
+            # else:
+            #    print(columnSeparator + transformDttm(item['Ends']), end='')   
+
+            if item['Description'] == None or len(item['Description']) == 0:
+                print(columnSeparator + "\"NULL\"", end='')
             else:
-                print(columnSeparator + "NULL" ) #, end ='')
-            # getting issues with the print statements after this line, and its about a none type
-            # but i checked the type of transformDollar(item['Currently'])  and colsep and neither were none
-            # it just needs to work for the 5 lines below these comments
-            # print(
-            #     columnSeparator + transformDollar(item['Currently']) + 
-            #     columnSeparator + item['Number_of_Bids'] + 
-            #     columnSeparator + transformDttm(item['Started']) + 
-            #     columnSeparator + transformDttm(item['Ends']) + 
-            #     columnSeparator + item['Description'])
-                #  + 
-                # columnSeparator + CATEGORIES!!!!!)
+                print(columnSeparator + item['Description'], end='')    
+
+            
+            print(columnSeparator + "\"|", end='') # begin Categories string
+            for category in item['Category']:
+                print(category + '|', end = '')
+                
+
+            print("\"") ## end Categories
             
             parseBids(item['Bids'], item['ItemID'])
             parseSeller(item['Seller'], item['Country'], item['Location'])
@@ -140,14 +178,16 @@ Bidder dictionary containing all the content for each bidder
 def parseSeller(seller, country, location):
     sys.stdout = sellers_file #redirects output stream to correct dat file
     print(
-        seller['UserID'] +
+        sqlString(seller['UserID']) + 
         columnSeparator + seller['Rating'] + 
-        columnSeparator + country + 
-        columnSeparator + location)
+        columnSeparator + sqlString(country) +
+        columnSeparator + sqlString(location))
     return
 
 """
 Bids is an array containing items
+Bid description below:
+
 Bids{description:"Bids placed on the item", type:array, items}
     items{title:Bid, type:object, properties}
         properties{Bidder,Time,Amount}
@@ -169,7 +209,7 @@ def parseBids(bids, ItemID):
         return
     for bid in bids:
         sys.stdout = bids_file #redirects output stream to correct dat file
-        print(ItemID + columnSeparator + bid['Bid']['Bidder']['UserID'] + columnSeparator + 
+        print(sqlString(ItemID) + columnSeparator + sqlString(bid['Bid']['Bidder']['UserID']) + columnSeparator + 
             transformDollar(bid['Bid']['Amount']) + columnSeparator + transformDttm(bid['Bid']['Time']))
         parseBidder(bid['Bid']['Bidder'])
     return
@@ -178,39 +218,35 @@ def parseBids(bids, ItemID):
 Bidder dictionary containing all the content for each bidder
 """
 def parseBidder(bidder):
-    sys.stdout = bidders_file #redirects output stream to correct dat file
-    
-    # I moved the portion that checks for nulls to the end so that when we have UserID|Rating|Country|Location
-    # the same ordering as seller
-
-    # if bidder['Location'] is None:
-    #     placeNullNotNone()
-    # if bidder['Country'] is None:
-    #     placeNullNotNone() 
+    sys.stdout = bidders_file #redirects output stream to correct dat file 
     
     print(
-        bidder['UserID'] +
-        columnSeparator + bidder['Rating'], end='') 
+        sqlString(bidder['UserID']) +
+        columnSeparator + bidder['Rating'], end = '') 
     if 'Country' in bidder.keys():
-        print(columnSeparator + bidder['Country'], end = '')
+        print(columnSeparator + sqlString(bidder['Country']), end = '')
     else:
-        print(columnSeparator + "NULL", end = '')
+        print(columnSeparator + "\"NULL\"", end = '')
     if 'Location' in bidder.keys():
-        print(columnSeparator + bidder['Location'])
+        print(columnSeparator + sqlString(bidder['Location']))
     else:
-        print(columnSeparator + "NULL")
+        print(columnSeparator + "\"NULL\"")
     return
 
-""" 
-replaces "none" item fields in the JSON file with the string "NULL" 
-see Loading NULL Values in the bulk-loading.pdf
-"""
-def placeNullNotNone():
-    print("NULL" + columnSeparator)
-    return
+def sqlString(input):
+    if input == None:
+        return '"NULL"'
+    output = input
+    if '"' in input:
+        index = input.index('"')
+        output = input[:index] + '"' + input[index:]
+    output = '"' + output + '"'
+    # sys.stdout = sys.__stdout__ #redirects output stream to correct dat file
+    return output
+
 
 """
-Loops through each json files provided on the command line and passes each file
+Loops through each json file provided on the command line and passes each file
 to the parser
 """
 def main(argv):
