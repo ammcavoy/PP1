@@ -1,0 +1,1 @@
+python skeleton_parser2.py ebay_data/items-0.json

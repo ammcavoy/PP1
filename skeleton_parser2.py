@@ -1,6 +1,6 @@
 
 """
-FILE: skeleton_parser.py
+FILE: skeleton_parser2.py
 ------------------
 Author: Firas Abuzaid (fabuzaid@stanford.edu)
 Author: Perth Charernwattanagul (puch@stanford.edu)
