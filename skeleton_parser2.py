@@ -83,25 +83,42 @@ of the necessary SQL tables for your database.
 def parseJson(json_file):
     with open(json_file, 'r') as f:
         items = loads(f.read())['Items'] # creates a Python dictionary of Items for the supplied json file
+        count = 0
         for item in items:
             #"required": ["ItemID", "Name", "Category", "Currently", "First_Bid", "Number_of_Bids", "Bids", "Location", "Country", "Started", "Ends", "Seller", "Description"]
-            # print(item['ItemID'] )
-                # + 
-                # columnSeparator + item['UserID'] + 
-                # columnSeparator + item['Country'] + 
-                # columnSeparator + item['Location'] +
-                # columnSeparator + item['Name'] + 
+            sys.stdout = items_file #redirects output stream to correct dat file
+            # sys.stdout = sys.__stdout__ #redirects output stream to correct dat file
+            # print(count)
+            # for key, value in item.items() :
+            #     print (key, value)
+            count += 1
+            print(
+                item['ItemID']  + 
+                columnSeparator + item['Seller']['UserID'] + 
+                columnSeparator + item['Country'] + 
+                columnSeparator + item['Location'] +
+                columnSeparator + item['Name'], end ='')
                 # columnSeparator + transformDollar(item['Buy_Price']) +   #might not be in JSON
-                # columnSeparator + transformDollar(item['First_Bid'] + 
-                # columnSeparator + transformDollar(item['Currently']) + 
-                # columnSeparator + items['Number_of_Bids']) +
-                # columnSeparator + items['Description'] + 
-                # columnSeparator + transformDttm(items['Started'] + 
-                # columnSeparator + transformDttm(items['Ends']) + 
+            if 'Buy_Price' in item.keys():
+                print(columnSeparator + transformDollar(item['Buy_Price']), end ='')
+            else:
+                print(columnSeparator + "NULL", end ='')
+            if 'First_Bid' in item.keys():
+                print(columnSeparator + transformDollar(item['First_Bid']) ) #, end ='')
+            else:
+                print(columnSeparator + "NULL" ) #, end ='')
+            # print(
+            #     columnSeparator + transformDollar(item['Currently']) + 
+            #     columnSeparator + item['Number_of_Bids'] + 
+            #     columnSeparator + transformDttm(item['Started']) + 
+            #     columnSeparator + transformDttm(item['Ends']) + 
+            #     columnSeparator + item['Description'])
+                #  + 
                 # columnSeparator + CATEGORIES!!!!!)
             
-            # parseBids(item['Bids'], item['ItemID'])
+            parseBids(item['Bids'], item['ItemID'])
             parseSeller(item['Seller'], item['Country'], item['Location'])
+            
             """
             TODO: traverse the items dictionary to extract information from the
             given `json_file' and generate the necessary .dat files to generate
@@ -143,9 +160,11 @@ Bids{description:"Bids placed on the item", type:array, items}
 def parseBids(bids, ItemID):
     sys.stdout = bids_file #redirects output stream to correct dat file
     if bids is None:
-        placeNullNotNone()
+        # i think this should be commented out, and just return with no prints - adam
+        # placeNullNotNone()  # this will give us a single line in the bids file that just has "NULL|" is this what we want????
         return
     for bid in bids:
+        sys.stdout = bids_file #redirects output stream to correct dat file
         print(ItemID + columnSeparator + bid['Bid']['Bidder']['UserID'] + columnSeparator + 
             transformDollar(bid['Bid']['Amount']) + columnSeparator + transformDttm(bid['Bid']['Time']))
         parseBidder(bid['Bid']['Bidder'])
@@ -155,13 +174,27 @@ def parseBids(bids, ItemID):
 Bidder dictionary containing all the content for each bidder
 """
 def parseBidder(bidder):
-    # sys.stdout = bidders_file #redirects output stream to correct dat file
-    if bidder['Location'] is None:
-        placeNullNotNone()
-    if bidder['Country'] is None:
-        placeNullNotNone() 
-    print(bidder['UserID'] + columnSeparator + bidder['Rating']) 
+    sys.stdout = bidders_file #redirects output stream to correct dat file
     
+    # I moved the portion that checks for nulls to the end so that when we have UserID|Rating|Country|Location
+    # the same ordering as seller
+
+    # if bidder['Location'] is None:
+    #     placeNullNotNone()
+    # if bidder['Country'] is None:
+    #     placeNullNotNone() 
+    
+    print(
+        bidder['UserID'] +
+        columnSeparator + bidder['Rating'], end='') 
+    if 'Country' in bidder.keys():
+        print(columnSeparator + bidder['Country'], end = '')
+    else:
+        print(columnSeparator + "NULL", end = '')
+    if 'Location' in bidder.keys():
+        print(columnSeparator + bidder['Location'])
+    else:
+        print(columnSeparator + "NULL")
     return
 
 """ 
@@ -186,6 +219,7 @@ def main(argv):
     for f in argv[1:]:
         if isJson(f):
             parseJson(f)
+            sys.stdout = sys.__stdout__ #redirects output stream to terminal after writing to file
             print("Success parsing " + f)
 
 if __name__ == '__main__':
