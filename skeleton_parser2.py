@@ -59,6 +59,7 @@ def transformMonth(mon):
 """
 Transforms a timestamp from Mon-DD-YY HH:MM:SS to YYYY-MM-DD HH:MM:SS
 """
+#hello, where be the changes?
 def transformDttm(dttm):
     dttm = dttm.strip().split(' ')
     dt = dttm[0].split('-')
