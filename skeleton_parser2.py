@@ -97,15 +97,9 @@ def parseJson(json_file):
     with open(json_file, 'r') as f:
         # creates a Python dictionary of Items for the supplied json file
         items = loads(f.read())['Items']
-        count = 0
         for item in items:
             # "required": ["ItemID", "Name", "Category", "Currently", "First_Bid", "Number_of_Bids", "Bids", "Location", "Country", "Started", "Ends", "Seller", "Description"]
             sys.stdout = items_file  # redirects output stream to correct dat file
-            # sys.stdout = sys.__stdout__ #redirects output stream to correct dat file
-            # print(count)
-            # for key, value in item.items() :
-            #     print (key, value)
-            count += 1
             print(
                 item['ItemID'] +
                 columnSeparator + sqlString(item['Seller']['UserID']) +
@@ -236,10 +230,7 @@ def parseBidder(bidder):
 def sqlString(input):
     if input == None:
         return '"NULL"'
-    output = input
-    if '"' in input:
-        index = input.index('"')
-        output = input[:index] + '"' + input[index:]
+    output = input.replace('"', '""')
     output = '"' + output + '"'
     # sys.stdout = sys.__stdout__ #redirects output stream to correct dat file
     return output
