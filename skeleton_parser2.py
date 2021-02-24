@@ -31,9 +31,9 @@ from re import sub
 
 # create .dat file object for each database
 sellers_file = open('sellers.dat', 'w')  # called in parseSeller()
-bids_file = open('bids.dat', 'w')  # called in parseBids()
+bids_file = open('bids.dat', 'w')        # called in parseBids()
 bidders_file = open('bidders.dat', 'w')  # called in parseBidders()
-items_file = open('items.dat', 'w')  # called in parseItems()
+items_file = open('items.dat', 'w')         # called in parseItems()
 
 columnSeparator = "|"
 
@@ -106,7 +106,6 @@ def parseJson(json_file):
                 columnSeparator + sqlString(item['Country']) +
                 columnSeparator + sqlString(item['Location']) +
                 columnSeparator + sqlString(item['Name']), end='')
-                # columnSeparator + transformDollar(item['Buy_Price']) +   #might not be in JSON
             if 'Buy_Price' in item.keys():
                 print(columnSeparator +
                       transformDollar(item['Buy_Price']), end='')
@@ -152,6 +151,7 @@ def parseJson(json_file):
 
             print("\"") ## end Categories
             
+
             parseBids(item['Bids'], item['ItemID'])
             parseSeller(item['Seller'], item['Country'], item['Location'])
             
@@ -175,7 +175,8 @@ def parseSeller(seller, country, location):
         sqlString(seller['UserID']) + 
         columnSeparator + seller['Rating'] + 
         columnSeparator + sqlString(country) +
-        columnSeparator + sqlString(location))
+        columnSeparator + sqlString(location)
+        )
     return
 
 """
@@ -205,7 +206,8 @@ def parseBids(bids, ItemID):
         sys.stdout = bids_file #redirects output stream to correct dat file
         print(sqlString(ItemID) + columnSeparator + sqlString(bid['Bid']['Bidder']['UserID']) + columnSeparator + 
             transformDollar(bid['Bid']['Amount']) + columnSeparator + transformDttm(bid['Bid']['Time']))
-        parseBidder(bid['Bid']['Bidder'])
+        parseBidder(bid['Bid']['Bidder']
+        )
     return
 
 """
@@ -252,6 +254,11 @@ def main(argv):
             parseJson(f)
             sys.stdout = sys.__stdout__ #redirects output stream to terminal after writing to file
             print("Success parsing " + f)
+    sellers_file.close()
+    items_file.close()
+    bids_file.close()
+    bidders_file.close()
+
 
 if __name__ == '__main__':
     main(sys.argv)
