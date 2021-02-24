@@ -1,2 +1,9 @@
 .seperator |
 .import items.dat Items
+UPDATE Items SET Buy_Price = NULL WHERE Buy_Price = "NULL"
+UPDATE Items SET Description = NULL WHERE Description = "NULL"
+.import bids.dat Bids
+.import sellers.dat Sellers
+.import bidders.dat Bidders
+Update Bidders SET Location = NULL WHERE Location = "NULL"
+UPDATE Bidders SET Country = NULL WHERE Country = "NULL"

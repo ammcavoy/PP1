@@ -1,9 +1,9 @@
-drop table if exists Item;
-drop table if exists Seller;
-drop table if exists Bidder;
-drop table if exists Bid;
+drop table if exists Items;
+drop table if exists Sellers;
+drop table if exists Bidders;
+drop table if exists Bids;
 
-create table Item(
+CREATE table Items(
     ItemID STRING,
     SellerID STRING,
     Country STRING,
@@ -17,28 +17,28 @@ create table Item(
     Started DATE,
     End DATE,
     Categories STRING
-    PRIMARY KEY ItemID,
-    FOREIGN KEY SellerID REFERENCES Seller);
+    PRIMARY KEY (ItemID),
+    FOREIGN KEY (SellerID) REFERENCES Sellers(UserID));
 
-create table Seller(
+CREATE table Sellers(
+    UserID STRING,
+    Rating INT,
+    Country STRING,
+    Location STRING,
+    PRIMARY KEY (UserID));
+
+CREATE table Bidders(
     UserID STRING,
     Rating INT,
     Country STRING,
     Location STRING
-    PRIMARY KEY UserID);
+    PRIMARY KEY (UserID));
 
-create table Bidder(
-    UserID STRING,
-    Rating INT,
-    Country STRING,
-    Location STRING
-    PRIMARY KEY UserID);
-
-create table Bid(
+CREATE table Bids(
     BidderID STRING,
     ItemID STRING,
     Amount FLOAT,
     Time DATE,
     PRIMARY KEY (BidderID, Time)
-    FOREIGN KEY BidderID REFERENCES Bidder
-    FOREIGN KEY ItemID REFERENCES Item);
+    FOREIGN KEY (BidderID) REFERENCES Bidders(UserID)
+    FOREIGN KEY (ItemID) REFERENCES Items(ItemID));
