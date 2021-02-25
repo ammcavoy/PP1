@@ -5,4 +5,4 @@ FROM (
 INTERSECT
     SELECT DISTINCT Bids.BidderID
     FROM Bids
-)
+);
