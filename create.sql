@@ -41,12 +41,12 @@ CREATE table Categories(
     PRIMARY KEY(ItemID, Category)
     FOREIGN KEY (ItemID) REFERENCES Items(ItemID));
 
-.separator |
-.import items.dat Items
-UPDATE Items SET Buy_Price = NULL WHERE Buy_Price = "NULL";
-UPDATE Items SET Description = NULL WHERE Description = "NULL";
-.import bids.dat Bids
-.import categories.dat Categories
-.import users.dat Users
-UPDATE Users SET Location = NULL WHERE Location = "NULL";
-UPDATE Users SET Country = NULL WHERE Country = "NULL";
+-- .separator |
+-- .import items.dat Items
+-- UPDATE Items SET Buy_Price = NULL WHERE Buy_Price = "NULL";
+-- UPDATE Items SET Description = NULL WHERE Description = "NULL";
+-- .import bids.dat Bids
+-- .import categories.dat Categories
+-- .import users.dat Users
+-- UPDATE Users SET Location = NULL WHERE Location = "NULL";
+-- UPDATE Users SET Country = NULL WHERE Country = "NULL";
