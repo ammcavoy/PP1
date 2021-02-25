@@ -1,0 +1,8 @@
+SELECT COUNT(*)
+FROM (
+    SELECT DISTINCT Items.SellerID
+    FROM Items    
+INTERSECT
+    SELECT DISTINCT Bids.BidderID
+    FROM Bids
+)

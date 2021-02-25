@@ -30,10 +30,12 @@ from json import loads
 from re import sub
 
 # create .dat file object for each database
-sellers_file = open('sellers.dat', 'w')  # called in parseSeller()
-bids_file = open('bids.dat', 'w')        # called in parseBids()
-bidders_file = open('bidders.dat', 'w')  # called in parseBidders()
-items_file = open('items.dat', 'w')         # called in parseItems()
+#sellers_file = open('sellers.dat', 'w')  # called in parseSeller()
+bids_file = open('bids.dat', 'w')  # called in parseBids()
+#bidders_file = open('bidders.dat', 'w')  # called in parseBidders()
+items_file = open('items.dat', 'w')  # called in parseItems()
+users_file = open('users.dat', 'w') # called by parseSellers() and parsebidders()
+categories_file = open('categories.dat', 'w')
 
 columnSeparator = "|"
 
@@ -44,8 +46,6 @@ MONTHS = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun'
 """
 Returns true if a file ends in .json
 """
-
-
 def isJson(f):
     return len(f) > 5 and f[-5:] == '.json'
 
@@ -53,20 +53,15 @@ def isJson(f):
 """
 Converts month to a number, e.g. 'Dec' to '12'
 """
-
-
 def transformMonth(mon):
     if mon in MONTHS:
         return MONTHS[mon]
     else:
         return mon
 
-
 """
 Transforms a timestamp from Mon-DD-YY HH:MM:SS to YYYY-MM-DD HH:MM:SS
 """
-
-
 def transformDttm(dttm):
     dttm = dttm.strip().split(' ')
     dt = dttm[0].split('-')
@@ -78,8 +73,6 @@ def transformDttm(dttm):
 """
 Transform a dollar value amount from a string like $3,453.23 to XXXXX.xx
 """
-
-
 def transformDollar(money):
     if money == None or len(money) == 0:
         return money
@@ -91,8 +84,6 @@ Parses a single json file. Currently, there's a loop that iterates over each
 item in the data set. Your job is to extend this functionality to create all
 of the necessary SQL tables for your database.
 """
-
-
 def parseJson(json_file):
     with open(json_file, 'r') as f:
         # creates a Python dictionary of Items for the supplied json file
@@ -106,6 +97,7 @@ def parseJson(json_file):
                 columnSeparator + sqlString(item['Country']) +
                 columnSeparator + sqlString(item['Location']) +
                 columnSeparator + sqlString(item['Name']), end='')
+                # columnSeparator + transformDollar(item['Buy_Price']) +   #might not be in JSON
             if 'Buy_Price' in item.keys():
                 print(columnSeparator +
                       transformDollar(item['Buy_Price']), end='')
@@ -118,40 +110,22 @@ def parseJson(json_file):
                 columnSeparator + item['Number_of_Bids'] +
                 columnSeparator + transformDollar(item['Started']) + 
                 columnSeparator + transformDttm(item['Ends']), end = '')
-            # if item['Currently'] == None or len(item['Currently']) == 0:
-            #     print(columnSeparator + "NULL", end='')
-            # else:
-            #    print(columnSeparator + transformDollar(item['Currently']), end='')
-
-            # if item['Number_of_Bids'] == None or len(item['Number_of_Bids']) == 0:
-            #     print(columnSeparator + "\"NULL\"", end='')
-            # else:
-            #    print(columnSeparator + item['Number_of_Bids'], end='')
-
-            # if item['Started'] == None or len(item['Started']) == 0:
-            #     print(columnSeparator + "\"NULL\"", end='')
-            # else:
-            #    print(columnSeparator + transformDollar(item['Started']), end='')
-
-            # if item['Ends'] == None or len(item['Ends']) == 0:
-            #     print(columnSeparator + "\"NULL\"", end='')
-            # else:
-            #    print(columnSeparator + transformDttm(item['Ends']), end='')   
-
+                
             if item['Description'] == None or len(item['Description']) == 0:
-                print(columnSeparator + "\"NULL\"", end='')
+                print(columnSeparator + "\"NULL\"")
             else:
-                print(columnSeparator + item['Description'], end='')    
+                print(columnSeparator + sqlString(item['Description']))    
 
-            
-            print(columnSeparator + "\"|", end='') # begin Categories string
+
+            """
+            print(columnSeparator + "\"||", end='') # begin Categories string
             for category in item['Category']:
                 print(category + '|', end = '')
-                
-
-            print("\"") ## end Categories
-            
-
+            print("|\"") ## end Categories 
+            """
+            numcat = parseCategories(item['Category'], item['ItemID'])
+            # sys.stdout = items_file  # redirects output stream to correct dat file
+            # print(columnSeparator + numcat)
             parseBids(item['Bids'], item['ItemID'])
             parseSeller(item['Seller'], item['Country'], item['Location'])
             
@@ -161,8 +135,18 @@ def parseJson(json_file):
             the SQL tables based on your relation design
             """
             pass
-        
 
+
+def parseCategories(categories, itemID):
+    sys.stdout = categories_file #redirects output stream to correct dat file
+    numCategories = 0
+    for category in categories:
+        numCategories +=1
+        print(
+            itemID + 
+            columnSeparator + sqlString(category)
+        )
+    return numCategories
 
 
 """
@@ -170,19 +154,17 @@ Bidder dictionary containing all the content for each bidder
     this one is correct and done - think so
 """
 def parseSeller(seller, country, location):
-    sys.stdout = sellers_file #redirects output stream to correct dat file
+    sys.stdout = users_file #redirects output stream to correct dat file
     print(
         sqlString(seller['UserID']) + 
         columnSeparator + seller['Rating'] + 
         columnSeparator + sqlString(country) +
-        columnSeparator + sqlString(location)
-        )
+        columnSeparator + sqlString(location))
     return
 
 """
 Bids is an array containing items
 Bid description below:
-
 Bids{description:"Bids placed on the item", type:array, items}
     items{title:Bid, type:object, properties}
         properties{Bidder,Time,Amount}
@@ -204,17 +186,16 @@ def parseBids(bids, ItemID):
         return
     for bid in bids:
         sys.stdout = bids_file #redirects output stream to correct dat file
-        print(sqlString(ItemID) + columnSeparator + sqlString(bid['Bid']['Bidder']['UserID']) + columnSeparator + 
+        print(sqlString(bid['Bid']['Bidder']['UserID']) + columnSeparator + sqlString(ItemID) + columnSeparator + 
             transformDollar(bid['Bid']['Amount']) + columnSeparator + transformDttm(bid['Bid']['Time']))
-        parseBidder(bid['Bid']['Bidder']
-        )
+        parseBidder(bid['Bid']['Bidder'])
     return
 
 """
 Bidder dictionary containing all the content for each bidder
 """
 def parseBidder(bidder):
-    sys.stdout = bidders_file #redirects output stream to correct dat file 
+    sys.stdout = users_file #redirects output stream to correct dat file 
     
     print(
         sqlString(bidder['UserID']) +
@@ -227,14 +208,17 @@ def parseBidder(bidder):
         print(columnSeparator + sqlString(bidder['Location']))
     else:
         print(columnSeparator + "\"NULL\"")
-    return
 
+
+"""
+converts any string into a string surrounded by double quotes and closes any open double quotes within 
+the string being converted
+"""
 def sqlString(input):
     if input == None:
         return '"NULL"'
     output = input.replace('"', '""')
     output = '"' + output + '"'
-    # sys.stdout = sys.__stdout__ #redirects output stream to correct dat file
     return output
 
 
@@ -254,11 +238,6 @@ def main(argv):
             parseJson(f)
             sys.stdout = sys.__stdout__ #redirects output stream to terminal after writing to file
             print("Success parsing " + f)
-    sellers_file.close()
-    items_file.close()
-    bids_file.close()
-    bidders_file.close()
-
 
 if __name__ == '__main__':
     main(sys.argv)
